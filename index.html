@@ -1,560 +1,220 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barcode Scanner V1</title> <!-- Updated to V1 -->
-    <style>
-        /* Keep all CSS styles as they are */
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 20px;
-        }
-        video {
-            width: 100%;
-            max-width: 400px;
-            border: 2px solid #ccc;
-            border-radius: 5px;
-            margin-bottom: 10px;
-        }
-        #output {
-            margin-top: 10px;
-            font-size: 1.2em;
-            font-weight: bold;
-            color: #333;
-        }
-        .error {
-            color: red;
-        }
-        #latestBarcode {
-            font-size: 1.5em;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: #4CAF50;
-        }
-        /* Button styles */
-        .main-button {
-            display: block;
-            width: 100%; /* Full width of the screen */
-            margin-bottom: 10px;
-            padding: 10px 20px;
-            font-size: 1em;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            box-sizing: border-box; /* Ensure padding is included in the width */
-        }
-        #initializeButton {
-            background-color: #F44336; /* Red color for initialize button */
-        }
-        #addEmptyBarcodeButton {
-            background-color: #FFEB3B; /* Yellow color for add empty barcode button */
-            color: black; /* Text color for better contrast */
-        }
-        #saveCsvButton {
-            background-color: #4CAF50; /* Green color for save CSV button */
-        }
-        /* Camera container styles */
-        .camera-container {
-            position: relative;
-            width: 100%;
-            max-width: 400px;
-            margin: 0 auto;
-        }
-        /* Initializing text and dots styles */
-        #initializingText {
-            position: absolute;
-            top: 60%; /* Adjusted to add space between dots and text */
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 1.2em;
-            font-weight: bold;
-            color: #333;
-        }
-        .dots-container {
-            position: absolute;
-            top: calc(50% - 30px); /* Position above the text */
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 5px;
-        }
-        .dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            animation: blinkDot 1.5s infinite;
-        }
-        .dot.red {
-            background-color: #F44336; /* Red dot */
-            animation-delay: 0s;
-        }
-        .dot.yellow {
-            background-color: #FFEB3B; /* Yellow dot */
-            animation-delay: 0.5s;
-        }
-        .dot.blue {
-            background-color: #2196F3; /* Blue dot */
-            animation-delay: 1s;
-        }
-        @keyframes blinkDot {
-            0%, 100% { opacity: 0; }
-            50% { opacity: 1; }
-        }
-        /* Modal styles */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            width: 300px; /* Set a fixed width for the modal */
-        }
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-        }
-        /* Modal button styles */
-        .modal button {
-            padding: 10px 20px;
-            margin: 5px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 100%; /* Make all buttons the same width */
-            box-sizing: border-box; /* Ensure padding is included in the width */
-        }
-        /* Correct button (green) */
-        .modal button.confirm {
-            background-color: #4CAF50; /* Green */
-            color: white;
-        }
-        /* Rescan button (blue) */
-        .modal button.rescan {
-            background-color: #2196F3; /* Blue */
-            color: white;
-        }
-        /* Enter Manually button (orange) */
-        .modal button.manual {
-            background-color: #FF9800; /* Orange */
-            color: white;
-            grid-column: span 2; /* Span across two columns */
-        }
-        /* Cancel button (red) */
-        .modal button.cancel {
-            background-color: #F44336; /* Red */
-            color: white;
-        }
-        /* Read Barcode button (yellow) */
-        .modal button.read {
-            background-color: #FFEB3B; /* Yellow */
-            color: black; /* Text color for better contrast */
-        }
-        /* Modal button grid layout */
-        .modal .button-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr; /* Two columns */
-            gap: 10px; /* Space between buttons */
-        }
-        /* Manual entry box styles */
-        #manualEntry {
-            display: none; /* Hidden by default */
-            grid-column: span 2; /* Span across both columns */
-            margin-top: 10px; /* Add some spacing above the box */
-        }
-        #manualEntry input {
-            width: 100%; /* Full width to match the submit button */
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box; /* Ensure padding is included in the width */
-        }
-        #manualEntry button {
-            width: 100%; /* Full width */
-            padding: 10px;
-            background-color: #4CAF50; /* Green */
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .dimmed {
-            filter: brightness(50%);
-        }
-        /* Barcode info styles */
-        #barcodeInfo {
-            font-size: 0.9em;
-            color: #666;
-            margin-top: 5px;
-        }
-        /* Barcode list styles */
-        #barcodeList {
-            width: 100%;
-            max-width: 600px;
-            margin: 20px auto;
-            border-collapse: collapse;
-        }
-        #barcodeList th, #barcodeList td {
-            padding: 10px;
-            border: 1px solid #ccc;
-            text-align: left;
-        }
-        #barcodeList th {
-            background-color: #f9f9f9;
-            font-weight: bold;
-        }
-        #barcodeList tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-    </style>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
-</head>
-<body>
-    <h1>Barcode Scanner V1</h1> <!-- Updated to V1 -->
-    <!-- Main menu buttons -->
-    <button id="initializeButton" class="main-button">Start Scanning Using Camera</button>
-    <button id="addEmptyBarcodeButton" class="main-button">Add Empty Barcode To The List</button>
-    <button id="saveCsvButton" class="main-button">Save Barcodes as a CSV file</button>
-    <!-- Camera frame box -->
-    <div class="camera-container">
-        <video id="video" autoplay muted playsinline></video>
-        <div class="dots-container">
-            <div class="dot red"></div>
-            <div class="dot yellow"></div>
-            <div class="dot blue"></div>
-        </div>
-        <div id="initializingText">Waiting To Start Scanning</div>
-    </div>
-    <!-- Latest barcode and list -->
-    <div id="latestBarcode">No barcode scanned yet.</div>
-    <table id="barcodeList">
-        <thead>
-            <tr>
-                <th>Value</th>
-                <th>Type</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Barcode rows will be added here dynamically -->
-        </tbody>
-    </table>
-    <audio id="beepSound" src="store-scanner-beep.mp3"></audio>
-    <!-- Modal for barcode confirmation -->
-    <div class="modal-overlay" id="modalOverlay"></div>
-    <div class="modal" id="modal">
-        <p>Is this barcode correct?</p>
-        <p id="detectedBarcode"></p>
-        <div id="barcodeInfo"></div>
-        <div class="button-grid">
-            <button class="confirm" onclick="confirmBarcode()">Correct</button>
-            <button class="rescan" onclick="rescanBarcode()">Rescan</button>
-            <button class="read" onclick="readBarcode()">Read Barcode</button>
-            <button class="cancel" onclick="cancelBarcode()">Cancel</button>
-            <button class="manual" onclick="enterManually()">Enter Manually</button>
-        </div>
-        <div id="manualEntry">
-            <input type="text" id="manualBarcode" placeholder="Enter barcode manually">
-            <button onclick="submitManualBarcode()">Submit</button>
-        </div>
-    </div>
-    <script>
-        const videoElement = document.getElementById('video');
-        const outputElement = document.getElementById('output');
-        const barcodeListElement = document.getElementById('barcodeList').getElementsByTagName('tbody')[0];
-        const latestBarcodeElement = document.getElementById('latestBarcode');
-        const beepSound = document.getElementById('beepSound');
-        const initializeButton = document.getElementById('initializeButton');
-        const saveCsvButton = document.getElementById('saveCsvButton');
-        const addEmptyBarcodeButton = document.getElementById('addEmptyBarcodeButton');
-        const modal = document.getElementById('modal');
-        const modalOverlay = document.getElementById('modalOverlay');
-        const detectedBarcodeElement = document.getElementById('detectedBarcode');
-        const barcodeInfoElement = document.getElementById('barcodeInfo');
-        const manualEntryElement = document.getElementById('manualEntry');
-        const manualBarcodeInput = document.getElementById('manualBarcode');
-        const initializingText = document.getElementById('initializingText');
-        const dotsContainer = document.querySelector('.dots-container');
-        let lastDetected = '';
-        let confirmCounter = 0;
-        let currentBarcode = '';
-        let isModalOpen = false;
+# Required libraries
+import requests
+import pandas as pd
+import plotly.graph_objects as go
+from datetime import datetime
+import numpy as np
+import time
 
-        const synth = window.speechSynthesis;
+# API details
+api_key = "YOUR_API_KEY"  # Replace with your actual API key
+base_url = "https://min-api.cryptocompare.com/data/v2/histoday"
 
-        function speakBarcode(barcode) {
-            if (synth.speaking) {
-                console.log("Speech synthesis is already in progress.");
-                return;
-            }
+# Cryptocurrency list
+crypto_list = {
+    "BTC": "Bitcoin",
+    "ETH": "Ethereum",
+    "ADA": "Cardano",
+    "SOL": "Solana",
+    "MATIC": "Polygon",
+    "LINK": "Chainlink",
+    "AVAX": "Avalanche",
+    "USDT": "Tether",
+    "USDC": "USD Coin",
+    "BNB": "Binance Coin",
+    "TON": "Toncoin",  # Added TON
+    "ARB": "Arbitrum",  # Added ARB
+    "RATS": "Rats",  # Added RATS
+    "PEPE": "Pepe",  # Added PEPE
+    "Ladys": "Milady Meme Coin",  # Added Ladys
+    "REPEL": "Repel",  # Added REPEL
+    "SUI": "Sui",  # Added SUI
+    "Laika": "Laika",  # Added Laika
+    "Pengu": "Pengu",  # Added Pengu
+    "GT": "GateToken",  # Added GT
+}
 
-            const digits = barcode.split('');
-            const delayBetweenDigits = 400;
-            const voices = synth.getVoices();
-            const femaleVoice = voices.find(voice => 
-                voice.name.toLowerCase().includes("female") || 
-                voice.lang.startsWith("en") && voice.name.toLowerCase().includes("woman")
-            );
+# Function to fetch historical data with retries and timeout
+def fetch_price_history(crypto, days, retries=3, delay=5):
+    url = f"{base_url}?fsym={crypto}&tsym=USD&limit={days}&api_key={api_key}"
+    for attempt in range(retries):
+        try:
+            response = requests.get(url, timeout=10)  # Set a timeout of 10 seconds
+            response.raise_for_status()  # Raise an exception for HTTP errors
+            data = response.json()
+            if data.get("Response") == "Success":
+                return data["Data"]["Data"]
+            else:
+                print(f"Warning: No historical data found for {crypto}")
+                return None
+        except (requests.exceptions.RequestException, ValueError) as e:
+            print(f"Attempt {attempt + 1} failed for {crypto}: {e}")
+            if attempt < retries - 1:
+                time.sleep(delay)  # Wait before retrying
+            else:
+                print(f"Max retries reached for {crypto}. Skipping...")
+                return None
 
-            digits.forEach((digit, index) => {
-                setTimeout(() => {
-                    const utterance = new SpeechSynthesisUtterance(digit);
-                    utterance.rate = 1.1;
-                    if (femaleVoice) {
-                        utterance.voice = femaleVoice;
-                    } else {
-                        console.warn("No female voice found. Using default voice.");
-                    }
-                    synth.speak(utterance);
-                }, index * delayBetweenDigits);
-            });
-        }
+# Function to calculate EMA (Exponential Moving Average)
+def calculate_ema(data, period):
+    return data["close"].ewm(span=period, adjust=False).mean()
 
-        function getBarcodeType(barcode) {
-            const length = barcode.length;
-            if (length === 12) return 'UPC-A';
-            if (length === 6) return 'UPC-E';
-            if (length === 13) {
-                if (barcode.startsWith('978') || barcode.startsWith('979')) return 'ISBN';
-                if (barcode.startsWith('45') || barcode.startsWith('49')) return 'JAN-13';
-                return 'EAN-13';
-            }
-            if (length === 8) return 'EAN-8';
-            if (length === 10) return 'ISSN';
-            return 'Unknown';
-        }
+# Function to calculate RSI (Relative Strength Index)
+def calculate_rsi(data, period=14):
+    delta = data["close"].diff()
+    gain = (delta.where(delta > 0, 0)).rolling(window=period).mean()
+    loss = (-delta.where(delta < 0, 0)).rolling(window=period).mean()
+    rs = gain / loss
+    rsi = 100 - (100 / (1 + rs))
+    return rsi
 
-        function validateBarcode(barcode) {
-            const type = getBarcodeType(barcode);
-            switch (type) {
-                case 'UPC-A':
-                    return /^\d{12}$/.test(barcode);
-                case 'UPC-E':
-                    return /^\d{6}$/.test(barcode);
-                case 'EAN-13':
-                    return /^\d{13}$/.test(barcode);
-                case 'EAN-8':
-                    return /^\d{8}$/.test(barcode);
-                case 'ISBN':
-                    return /^\d{13}$/.test(barcode) && (barcode.startsWith('978') || barcode.startsWith('979'));
-                case 'JAN-13':
-                    return /^\d{13}$/.test(barcode) && (barcode.startsWith('45') || barcode.startsWith('49'));
-                case 'ISSN':
-                    return /^\d{10}$/.test(barcode);
-                default:
-                    return false;
-            }
-        }
+# Function to calculate support and resistance levels
+def calculate_support_resistance(data):
+    support = data["low"].rolling(window=14).min().iloc[-1]
+    resistance = data["high"].rolling(window=14).max().iloc[-1]
+    return support, resistance
 
-        async function initializeCameraAndScanner() {
-            try {
-                initializeButton.style.display = 'none';
-                initializingText.style.display = 'block'; // Show initializing text
-                dotsContainer.style.display = 'flex'; // Show blinking dots
+# Map duration options to days
+duration_options = {
+    "1 week": 7,
+    "2 weeks": 14,
+    "1 month": 30,
+    "6 months": 180,
+    "1 year": 365
+}
 
-                const devices = await navigator.mediaDevices.enumerateDevices();
-                const backCamera = devices.find(
-                    (device) => device.kind === "videoinput" && device.label.toLowerCase().includes("back")
-                );
+# Prompt user for duration
+print("Select the price history duration:")
+for i, option in enumerate(duration_options.keys(), start=1):
+    print(f"{i}. {option}")
 
-                const constraints = backCamera
-                    ? { video: { deviceId: { exact: backCamera.deviceId }, width: 1280, height: 720 } }
-                    : { video: { facingMode: "environment", width: 1280, height: 720 } };
+choice = int(input("Enter your choice (1-5): "))
+if choice < 1 or choice > 5:
+    print("Invalid choice. Exiting.")
+    exit()
 
-                const stream = await navigator.mediaDevices.getUserMedia(constraints);
-                videoElement.srcObject = stream;
+# Get the selected duration
+selected_duration = list(duration_options.keys())[choice - 1]
+days = duration_options[selected_duration]
 
-                Quagga.init({
-                    inputStream: {
-                        name: "Live",
-                        type: "LiveStream",
-                        target: videoElement,
-                        constraints
-                    },
-                    decoder: {
-                        readers: [
-                            "upc_reader",
-                            "upc_e_reader",
-                            "ean_reader",
-                            "ean_8_reader",
-                            "code_128_reader",
-                        ],
-                    },
-                    locator: {
-                        patchSize: "large",
-                        halfSample: false
-                    },
-                    locate: true,
-                    frequency: 10
-                }, function (err) {
-                    if (err) {
-                        console.error("Quagga initialization failed:", err);
-                        outputElement.textContent = "Error initializing barcode scanner.";
-                        outputElement.classList.add("error");
-                        return;
-                    }
-                    Quagga.start();
-                    initializingText.style.display = 'none'; // Hide initializing text
-                    dotsContainer.style.display = 'none'; // Hide blinking dots
-                    outputElement.textContent = "Point your camera at barcodes.";
-                });
+print(f"\nFetching historical data for the past {selected_duration}...\n")
 
-                Quagga.onDetected((data) => {
-                    if (isModalOpen) return;
+# Fetch data and filter out coins with no historical data
+valid_data = []
+for crypto, name in crypto_list.items():
+    history_data = fetch_price_history(crypto, days)
+    if history_data:
+        df = pd.DataFrame(history_data)
+        df["time"] = pd.to_datetime(df["time"], unit="s")  # Convert timestamp to datetime
 
-                    const code = data.codeResult.code;
+        # Calculate technical indicators
+        df["EMA_50"] = calculate_ema(df, 50)
+        df["EMA_200"] = calculate_ema(df, 200)
+        df["RSI"] = calculate_rsi(df)
+        support, resistance = calculate_support_resistance(df)
 
-                    if (!validateBarcode(code)) {
-                        console.log("Invalid barcode detected:", code);
-                        return;
-                    }
+        valid_data.append((crypto, name, df, support, resistance))
+        print(f"Processed data for {name} ({crypto}):")
+        print(df[["time", "close", "EMA_50", "EMA_200", "RSI"]].tail())  # Debugging: Print the last few rows
 
-                    if (lastDetected === code) {
-                        confirmCounter++;
-                        if (confirmCounter >= 3) {
-                            confirmCounter = 0;
-                            processBarcode(code);
-                        }
-                    } else {
-                        lastDetected = code;
-                        confirmCounter = 1;
-                    }
-                });
-            } catch (error) {
-                console.error("Error accessing camera or initializing scanner:", error);
-                outputElement.textContent = "Error accessing the camera or initializing scanner.";
-                outputElement.classList.add("error");
-            }
-        }
+# Check if there's any valid data
+if not valid_data:
+    print("No valid historical data found for any cryptocurrency. Exiting.")
+    exit()
 
-        function processBarcode(barcode) {
-            currentBarcode = barcode;
-            showModal(barcode);
-        }
+# Create a list to store all figures
+figures = []
 
-        function showModal(barcode) {
-            beepSound.currentTime = 0;
-            beepSound.play();
-            detectedBarcodeElement.textContent = barcode;
+# Generate a separate chart for each cryptocurrency
+for crypto, name, df, support, resistance in valid_data:
+    # Create a new figure
+    fig = go.Figure()
 
-            const barcodeType = getBarcodeType(barcode);
-            const barcodeDigits = barcode ? barcode.length : 0;
+    # Add traces for price, EMAs, and support/resistance levels
+    fig.add_trace(
+        go.Scatter(x=df["time"], y=df["close"], mode="lines", name="Close Price", line=dict(color="black", width=2))
+    )
+    fig.add_trace(
+        go.Scatter(x=df["time"], y=df["EMA_50"], mode="lines", name="50-day EMA", line=dict(color="yellow", width=1.5, dash="dash"))
+    )
+    fig.add_trace(
+        go.Scatter(x=df["time"], y=df["EMA_200"], mode="lines", name="200-day EMA", line=dict(color="red", width=1.5, dash="dash"))
+    )
+    fig.add_trace(
+        go.Scatter(x=df["time"], y=[support] * len(df), mode="lines", name="Support (coin tends to stop falling and move up)", line=dict(color="limegreen", width=1.5, dash="dot"))
+    )
+    fig.add_trace(
+        go.Scatter(x=df["time"], y=[resistance] * len(df), mode="lines", name="Resistance (coin tends to stop rising and move down)", line=dict(color="orange", width=1.5, dash="dot"))
+    )
 
-            barcodeInfoElement.textContent = `${barcodeType} (${barcodeDigits} digits)`;
+    # Add RSI as a secondary y-axis
+    fig.add_trace(
+        go.Scatter(x=df["time"], y=df["RSI"], mode="lines", name="RSI (above 70 = Sell / below 30 = Buy)", line=dict(color="blue", width=1.5), yaxis="y2")
+    )
 
-            modal.style.display = 'block';
-            modalOverlay.style.display = 'block';
-            videoElement.classList.add('dimmed');
-            isModalOpen = true;
-            manualEntryElement.style.display = 'none';
-        }
+    # Update layout for the chart
+    fig.update_layout(
+        title=f"{name} ({crypto}) Price History with Technical Indicators ({selected_duration})",
+        xaxis=dict(title="Date", tickangle=45),
+        yaxis=dict(title="Price (USD)"),
+        yaxis2=dict(title="RSI", overlaying="y", side="right", range=[0, 100]),
+        showlegend=True,  # Show legend to specify what each line represents
+        template="plotly_white",  # Use a clean theme
+        margin=dict(l=50, r=50, b=150, t=100, pad=10),  # Adjust margins to accommodate annotations
+        font=dict(size=12)  # Set font size
+    )
 
-        function hideModal() {
-            modal.style.display = 'none';
-            modalOverlay.style.display = 'none';
-            videoElement.classList.remove('dimmed');
-            isModalOpen = false;
-        }
+    # Add horizontal lines for RSI thresholds
+    fig.add_hline(y=30, line=dict(color="red", dash="dash", width=1), yref="y2")
+    fig.add_hline(y=70, line=dict(color="green", dash="dash", width=1), yref="y2")
 
-        function confirmBarcode() {
-            updateUIWithBarcode(currentBarcode);
-            hideModal();
-        }
+    # Check for Golden Cross (50-day EMA > 200-day EMA)
+    if df["EMA_50"].iloc[-1] > df["EMA_200"].iloc[-1]:
+        fig.add_annotation(
+            x=0.5,
+            y=-0.2,
+            xref="paper",
+            yref="paper",
+            text="Golden Cross = A potential buy",
+            showarrow=False,
+            font=dict(size=12, color="green"),
+            xanchor="center",
+            yanchor="top"
+        )
 
-        function rescanBarcode() {
-            hideModal();
-        }
+    # Check for RSI conditions
+    rsi_value = df["RSI"].iloc[-1]
+    if rsi_value <= 30:
+        fig.add_annotation(
+            x=0.5,
+            y=-0.3,
+            xref="paper",
+            yref="paper",
+            text="Buying opportunity based on RSI (oversold)",
+            showarrow=False,
+            font=dict(size=12, color="blue"),
+            xanchor="center",
+            yanchor="top"
+        )
+    elif rsi_value > 70:
+        fig.add_annotation(
+            x=0.5,
+            y=-0.3,
+            xref="paper",
+            yref="paper",
+            text="Selling opportunity based on RSI (overbought)",
+            showarrow=False,
+            font=dict(size=12, color="red"),
+            xanchor="center",
+            yanchor="top"
+        )
 
-        function enterManually() {
-            manualEntryElement.style.display = 'block';
-        }
+    # Add the figure to the list
+    figures.append(fig)
 
-        function submitManualBarcode() {
-            const manualBarcode = manualBarcodeInput.value;
-            updateUIWithBarcode(manualBarcode);
-            manualBarcodeInput.value = '';
-            hideModal();
-        }
+# Save all figures to a single HTML file
+with open("crypto_charts.html", "w") as f:
+    for fig in figures:
+        f.write(fig.to_html(full_html=False, include_plotlyjs="cdn"))
 
-        function cancelBarcode() {
-            hideModal();
-        }
-
-        function readBarcode() {
-            speakBarcode(currentBarcode);
-        }
-
-        function updateUIWithBarcode(barcode) {
-            latestBarcodeElement.textContent = barcode ? `Latest Scanned: ${barcode}` : "Latest Scanned: (Empty)";
-
-            const barcodeType = getBarcodeType(barcode);
-            const newRow = barcodeListElement.insertRow(0);
-            const valueCell = newRow.insertCell(0);
-            const typeCell = newRow.insertCell(1);
-            valueCell.textContent = barcode || ""; // Empty entry instead of "(Empty)"
-            typeCell.textContent = barcodeType;
-
-            if (barcodeListElement.rows.length > 0) {
-                saveCsvButton.style.display = 'block';
-            }
-        }
-
-        function addEmptyBarcode() {
-            updateUIWithBarcode(''); // Add an empty entry
-        }
-
-        function getCurrentDateTime() {
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            const hours = String(now.getHours() % 12 || 12).padStart(2, '0'); // 12-hour format
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            const ampm = now.getHours() >= 12 ? 'PM' : 'AM';
-            return `${year}-${month}-${day}_${ampm}${hours}${minutes}${seconds}`;
-        }
-
-        function downloadCSV() {
-            const storeName = prompt("Please enter the store name:");
-            if (!storeName) {
-                alert("Store name is required to save the CSV file.");
-                return;
-            }
-
-            const barcodes = [];
-            const rows = barcodeListElement.getElementsByTagName('tr');
-            for (let i = 0; i < rows.length; i++) {
-                const barcode = rows[i].getElementsByTagName('td')[0].textContent;
-                barcodes.push(barcode);
-            }
-
-            const csvContent = "data:text/csv;charset=utf-8," + barcodes.join("\n");
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `${storeName}_${getCurrentDateTime()}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        initializeButton.addEventListener('click', initializeCameraAndScanner);
-        saveCsvButton.addEventListener('click', downloadCSV);
-        addEmptyBarcodeButton.addEventListener('click', addEmptyBarcode);
-    </script>
-</body>
-</html>
+print("All charts saved to crypto_charts.html. Open the file in your browser to view them.")
