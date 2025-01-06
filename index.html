@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barcode Scanner V5</title> <!-- Updated to V5 -->
+    <title>Barcode Scanner V1</title> <!-- Updated to V1 -->
     <style>
         /* Keep all CSS styles as they are */
         body {
@@ -224,7 +224,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
 </head>
 <body>
-    <h1>Barcode Scanner V5</h1> <!-- Updated to V5 -->
+    <h1>Barcode Scanner V1</h1> <!-- Updated to V1 -->
     <!-- Main menu buttons -->
     <button id="initializeButton" class="main-button">Start Scanning Using Camera</button>
     <button id="addEmptyBarcodeButton" class="main-button">Add Empty Barcode To The List</button>
@@ -334,8 +334,6 @@
             }
             if (length === 8) return 'EAN-8';
             if (length === 10) return 'ISSN';
-            if (/^[A-Z0-9\-\.\ \$\/\+\%]+$/.test(barcode)) return 'Code 39'; // Added Code 39 support
-            if (/^[A-Za-z0-9\.]+$/.test(barcode)) return 'Code 128'; // Added Code 128 support with periods
             return 'Unknown';
         }
 
@@ -356,10 +354,6 @@
                     return /^\d{13}$/.test(barcode) && (barcode.startsWith('45') || barcode.startsWith('49'));
                 case 'ISSN':
                     return /^\d{10}$/.test(barcode);
-                case 'Code 39': // Added validation for Code 39
-                    return /^[A-Z0-9\-\.\ \$\/\+\%]+$/.test(barcode);
-                case 'Code 128': // Added validation for Code 128 with periods
-                    return /^[A-Za-z0-9\.]+$/.test(barcode);
                 default:
                     return false;
             }
@@ -397,7 +391,6 @@
                             "ean_reader",
                             "ean_8_reader",
                             "code_128_reader",
-                            "code_39_reader" // Added Code 39 support
                         ],
                     },
                     locator: {
