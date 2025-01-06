@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barcode Scanner V2</title> <!-- Updated to V2 -->
+    <title>Barcode Scanner V3</title> <!-- Updated to V2 -->
     <style>
         /* Keep all CSS styles as they are */
         body {
@@ -224,7 +224,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
 </head>
 <body>
-    <h1>Barcode Scanner V2</h1> <!-- Updated to V2 -->
+    <h1>Barcode Scanner V3</h1> <!-- Updated to V2 -->
     <!-- Main menu buttons -->
     <button id="initializeButton" class="main-button">Start Scanning Using Camera</button>
     <button id="addEmptyBarcodeButton" class="main-button">Add Empty Barcode To The List</button>
@@ -334,7 +334,7 @@
             }
             if (length === 8) return 'EAN-8';
             if (length === 10) return 'ISSN';
-            if (length === 14) return 'Code 128'; // Added support for Code 128
+            if (/^[A-Z0-9\-\.\ \$\/\+\%]+$/.test(barcode)) return 'Code 39'; // Added Code 39 support
             return 'Unknown';
         }
 
@@ -355,8 +355,8 @@
                     return /^\d{13}$/.test(barcode) && (barcode.startsWith('45') || barcode.startsWith('49'));
                 case 'ISSN':
                     return /^\d{10}$/.test(barcode);
-                case 'Code 128': // Added validation for Code 128
-                    return /^[A-Za-z0-9]+$/.test(barcode); // Alphanumeric validation
+                case 'Code 39': // Added validation for Code 39
+                    return /^[A-Z0-9\-\.\ \$\/\+\%]+$/.test(barcode);
                 default:
                     return false;
             }
@@ -393,7 +393,8 @@
                             "upc_e_reader",
                             "ean_reader",
                             "ean_8_reader",
-                            "code_128_reader", // Added support for Code 128
+                            "code_128_reader",
+                            "code_39_reader" // Added Code 39 support
                         ],
                     },
                     locator: {
