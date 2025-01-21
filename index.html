@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barcode Scanner V1</title> <!-- Updated to V1 -->
+    <title>Barcode Scanner V2</title> <!-- Updated to V1 -->
     <style>
         /* Keep all CSS styles as they are */
         body {
@@ -513,7 +513,7 @@
         }
 
         function addEmptyBarcode() {
-            updateUIWithBarcode(''); // Add an empty entry
+            updateUIWithBarcode('NO_BARCODE-00000000'); // Add an empty entry, the code NO_BARCODE-00000000 is what the shopping assistant app uses for empty barcode
         }
 
         function getCurrentDateTime() {
