@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barcode Scanner V2</title> <!-- Updated to V1 -->
+    <title>Barcode Scanner V1</title>
     <style>
-        /* Keep all CSS styles as they are */
+        /* [Keeping all original CSS styles unchanged as requested] */
         body {
             font-family: Arial, sans-serif;
             text-align: center;
@@ -33,10 +33,9 @@
             margin-bottom: 10px;
             color: #4CAF50;
         }
-        /* Button styles */
         .main-button {
             display: block;
-            width: 100%; /* Full width of the screen */
+            width: 100%;
             margin-bottom: 10px;
             padding: 10px 20px;
             font-size: 1em;
@@ -44,29 +43,27 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            box-sizing: border-box; /* Ensure padding is included in the width */
+            box-sizing: border-box;
         }
         #initializeButton {
-            background-color: #F44336; /* Red color for initialize button */
+            background-color: #F44336;
         }
         #addEmptyBarcodeButton {
-            background-color: #FFEB3B; /* Yellow color for add empty barcode button */
-            color: black; /* Text color for better contrast */
+            background-color: #FFEB3B;
+            color: black;
         }
         #saveCsvButton {
-            background-color: #4CAF50; /* Green color for save CSV button */
+            background-color: #4CAF50;
         }
-        /* Camera container styles */
         .camera-container {
             position: relative;
             width: 100%;
             max-width: 400px;
             margin: 0 auto;
         }
-        /* Initializing text and dots styles */
         #initializingText {
             position: absolute;
-            top: 60%; /* Adjusted to add space between dots and text */
+            top: 60%;
             left: 50%;
             transform: translate(-50%, -50%);
             font-size: 1.2em;
@@ -75,7 +72,7 @@
         }
         .dots-container {
             position: absolute;
-            top: calc(50% - 30px); /* Position above the text */
+            top: calc(50% - 30px);
             left: 50%;
             transform: translateX(-50%);
             display: flex;
@@ -88,22 +85,21 @@
             animation: blinkDot 1.5s infinite;
         }
         .dot.red {
-            background-color: #F44336; /* Red dot */
+            background-color: #F44336;
             animation-delay: 0s;
         }
         .dot.yellow {
-            background-color: #FFEB3B; /* Yellow dot */
+            background-color: #FFEB3B;
             animation-delay: 0.5s;
         }
         .dot.blue {
-            background-color: #2196F3; /* Blue dot */
+            background-color: #2196F3;
             animation-delay: 1s;
         }
         @keyframes blinkDot {
             0%, 100% { opacity: 0; }
             50% { opacity: 1; }
         }
-        /* Modal styles */
         .modal {
             display: none;
             position: fixed;
@@ -115,7 +111,7 @@
             border-radius: 5px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             z-index: 1000;
-            width: 300px; /* Set a fixed width for the modal */
+            width: 300px;
         }
         .modal-overlay {
             display: none;
@@ -127,66 +123,58 @@
             background: rgba(0, 0, 0, 0.5);
             z-index: 999;
         }
-        /* Modal button styles */
         .modal button {
             padding: 10px 20px;
             margin: 5px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            width: 100%; /* Make all buttons the same width */
-            box-sizing: border-box; /* Ensure padding is included in the width */
+            width: 100%;
+            box-sizing: border-box;
         }
-        /* Correct button (green) */
         .modal button.confirm {
-            background-color: #4CAF50; /* Green */
+            background-color: #4CAF50;
             color: white;
         }
-        /* Rescan button (blue) */
         .modal button.rescan {
-            background-color: #2196F3; /* Blue */
+            background-color: #2196F3;
             color: white;
         }
-        /* Enter Manually button (orange) */
         .modal button.manual {
-            background-color: #FF9800; /* Orange */
+            background-color: #FF9800;
             color: white;
-            grid-column: span 2; /* Span across two columns */
+            grid-column: span 2;
         }
-        /* Cancel button (red) */
         .modal button.cancel {
-            background-color: #F44336; /* Red */
+            background-color: #F44336;
             color: white;
         }
-        /* Read Barcode button (yellow) */
         .modal button.read {
-            background-color: #FFEB3B; /* Yellow */
-            color: black; /* Text color for better contrast */
+            background-color: #FFEB3B;
+            color: black;
         }
-        /* Modal button grid layout */
         .modal .button-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr; /* Two columns */
-            gap: 10px; /* Space between buttons */
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
         }
-        /* Manual entry box styles */
         #manualEntry {
-            display: none; /* Hidden by default */
-            grid-column: span 2; /* Span across both columns */
-            margin-top: 10px; /* Add some spacing above the box */
+            display: none;
+            grid-column: span 2;
+            margin-top: 10px;
         }
         #manualEntry input {
-            width: 100%; /* Full width to match the submit button */
+            width: 100%;
             padding: 10px;
             margin-bottom: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
-            box-sizing: border-box; /* Ensure padding is included in the width */
+            box-sizing: border-box;
         }
         #manualEntry button {
-            width: 100%; /* Full width */
+            width: 100%;
             padding: 10px;
-            background-color: #4CAF50; /* Green */
+            background-color: #4CAF50;
             color: white;
             border: none;
             border-radius: 5px;
@@ -195,13 +183,11 @@
         .dimmed {
             filter: brightness(50%);
         }
-        /* Barcode info styles */
         #barcodeInfo {
             font-size: 0.9em;
             color: #666;
             margin-top: 5px;
         }
-        /* Barcode list styles */
         #barcodeList {
             width: 100%;
             max-width: 600px;
@@ -224,12 +210,10 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
 </head>
 <body>
-    <h1>Barcode Scanner V2</h1> <!-- Updated to V1 -->
-    <!-- Main menu buttons -->
+    <h1>Barcode Scanner V1</h1>
     <button id="initializeButton" class="main-button">Start Scanning Using Camera</button>
     <button id="addEmptyBarcodeButton" class="main-button">Add Empty Barcode To The List</button>
     <button id="saveCsvButton" class="main-button">Save Barcodes as a CSV file</button>
-    <!-- Camera frame box -->
     <div class="camera-container">
         <video id="video" autoplay muted playsinline></video>
         <div class="dots-container">
@@ -239,7 +223,6 @@
         </div>
         <div id="initializingText">Waiting To Start Scanning</div>
     </div>
-    <!-- Latest barcode and list -->
     <div id="latestBarcode">No barcode scanned yet.</div>
     <table id="barcodeList">
         <thead>
@@ -249,11 +232,9 @@
             </tr>
         </thead>
         <tbody>
-            <!-- Barcode rows will be added here dynamically -->
         </tbody>
     </table>
     <audio id="beepSound" src="store-scanner-beep.mp3"></audio>
-    <!-- Modal for barcode confirmation -->
     <div class="modal-overlay" id="modalOverlay"></div>
     <div class="modal" id="modal">
         <p>Is this barcode correct?</p>
@@ -300,7 +281,6 @@
                 console.log("Speech synthesis is already in progress.");
                 return;
             }
-
             const digits = barcode.split('');
             const delayBetweenDigits = 400;
             const voices = synth.getVoices();
@@ -308,16 +288,11 @@
                 voice.name.toLowerCase().includes("female") || 
                 voice.lang.startsWith("en") && voice.name.toLowerCase().includes("woman")
             );
-
             digits.forEach((digit, index) => {
                 setTimeout(() => {
                     const utterance = new SpeechSynthesisUtterance(digit);
                     utterance.rate = 1.1;
-                    if (femaleVoice) {
-                        utterance.voice = femaleVoice;
-                    } else {
-                        console.warn("No female voice found. Using default voice.");
-                    }
+                    if (femaleVoice) utterance.voice = femaleVoice;
                     synth.speak(utterance);
                 }, index * delayBetweenDigits);
             });
@@ -338,36 +313,29 @@
         }
 
         function validateBarcode(barcode) {
-            const type = getBarcodeType(barcode);
-            switch (type) {
-                case 'UPC-A':
-                    return /^\d{12}$/.test(barcode);
-                case 'UPC-E':
-                    return /^\d{6}$/.test(barcode);
-                case 'EAN-13':
-                    return /^\d{13}$/.test(barcode);
-                case 'EAN-8':
-                    return /^\d{8}$/.test(barcode);
-                case 'ISBN':
-                    return /^\d{13}$/.test(barcode) && (barcode.startsWith('978') || barcode.startsWith('979'));
-                case 'JAN-13':
-                    return /^\d{13}$/.test(barcode) && (barcode.startsWith('45') || barcode.startsWith('49'));
-                case 'ISSN':
-                    return /^\d{10}$/.test(barcode);
-                default:
-                    return false;
-            }
+            if (!barcode || typeof barcode !== 'string') return false;
+            const length = barcode.length;
+            const typeChecks = {
+                'UPC-A': length === 12 && /^\d{12}$/.test(barcode),
+                'UPC-E': length === 6 && /^\d{6}$/.test(barcode),
+                'EAN-13': length === 13 && /^\d{13}$/.test(barcode),
+                'EAN-8': length === 8 && /^\d{8}$/.test(barcode),
+                'ISBN': length === 13 && /^\d{13}$/.test(barcode) && (barcode.startsWith('978') || barcode.startsWith('979')),
+                'JAN-13': length === 13 && /^\d{13}$/.test(barcode) && (barcode.startsWith('45') || barcode.startsWith('49')),
+                'ISSN': length === 10 && /^\d{10}$/.test(barcode)
+            };
+            return Object.values(typeChecks).some(check => check);
         }
 
         async function initializeCameraAndScanner() {
             try {
                 initializeButton.style.display = 'none';
-                initializingText.style.display = 'block'; // Show initializing text
-                dotsContainer.style.display = 'flex'; // Show blinking dots
+                initializingText.style.display = 'block';
+                dotsContainer.style.display = 'flex';
 
                 const devices = await navigator.mediaDevices.enumerateDevices();
                 const backCamera = devices.find(
-                    (device) => device.kind === "videoinput" && device.label.toLowerCase().includes("back")
+                    device => device.kind === "videoinput" && device.label.toLowerCase().includes("back")
                 );
 
                 const constraints = backCamera
@@ -382,7 +350,8 @@
                         name: "Live",
                         type: "LiveStream",
                         target: videoElement,
-                        constraints
+                        constraints,
+                        singleChannel: false // Enable color processing for better detection
                     },
                     decoder: {
                         readers: [
@@ -390,15 +359,18 @@
                             "upc_e_reader",
                             "ean_reader",
                             "ean_8_reader",
-                            "code_128_reader",
+                            "code_128_reader"
                         ],
+                        multiple: false // Focus on single barcode detection
                     },
                     locator: {
-                        patchSize: "large",
-                        halfSample: false
+                        patchSize: "medium", // Faster processing than "large"
+                        halfSample: true,    // Improve performance
+                        refine: true        // Better accuracy
                     },
-                    locate: true,
-                    frequency: 10
+                    numOfWorkers: navigator.hardwareConcurrency || 4, // Utilize available CPU cores
+                    frequency: 20, // Increase scan frequency (was 10)
+                    locate: true
                 }, function (err) {
                     if (err) {
                         console.error("Quagga initialization failed:", err);
@@ -407,16 +379,21 @@
                         return;
                     }
                     Quagga.start();
-                    initializingText.style.display = 'none'; // Hide initializing text
-                    dotsContainer.style.display = 'none'; // Hide blinking dots
+                    initializingText.style.display = 'none';
+                    dotsContainer.style.display = 'none';
                     outputElement.textContent = "Point your camera at barcodes.";
+                });
+
+                Quagga.onProcessed(function(result) {
+                    if (result && result.box) {
+                        // Optional: Could add visual feedback here if needed
+                    }
                 });
 
                 Quagga.onDetected((data) => {
                     if (isModalOpen) return;
 
                     const code = data.codeResult.code;
-
                     if (!validateBarcode(code)) {
                         console.log("Invalid barcode detected:", code);
                         return;
@@ -424,7 +401,8 @@
 
                     if (lastDetected === code) {
                         confirmCounter++;
-                        if (confirmCounter >= 3) {
+                        // Reduced threshold from 3 to 2 for faster detection
+                        if (confirmCounter >= 2) {
                             confirmCounter = 0;
                             processBarcode(code);
                         }
@@ -433,6 +411,7 @@
                         confirmCounter = 1;
                     }
                 });
+
             } catch (error) {
                 console.error("Error accessing camera or initializing scanner:", error);
                 outputElement.textContent = "Error accessing the camera or initializing scanner.";
@@ -449,12 +428,9 @@
             beepSound.currentTime = 0;
             beepSound.play();
             detectedBarcodeElement.textContent = barcode;
-
             const barcodeType = getBarcodeType(barcode);
             const barcodeDigits = barcode ? barcode.length : 0;
-
             barcodeInfoElement.textContent = `${barcodeType} (${barcodeDigits} digits)`;
-
             modal.style.display = 'block';
             modalOverlay.style.display = 'block';
             videoElement.classList.add('dimmed');
@@ -499,21 +475,19 @@
 
         function updateUIWithBarcode(barcode) {
             latestBarcodeElement.textContent = barcode ? `Latest Scanned: ${barcode}` : "Latest Scanned: (Empty)";
-
             const barcodeType = getBarcodeType(barcode);
             const newRow = barcodeListElement.insertRow(0);
             const valueCell = newRow.insertCell(0);
             const typeCell = newRow.insertCell(1);
-            valueCell.textContent = barcode || ""; // Empty entry instead of "(Empty)"
+            valueCell.textContent = barcode || "";
             typeCell.textContent = barcodeType;
-
             if (barcodeListElement.rows.length > 0) {
                 saveCsvButton.style.display = 'block';
             }
         }
 
         function addEmptyBarcode() {
-            updateUIWithBarcode('NO_BARCODE-00000000'); // Add an empty entry, the code NO_BARCODE-00000000 is what the shopping assistant app uses for empty barcode
+            updateUIWithBarcode('NO_BARCODE-00000000');
         }
 
         function getCurrentDateTime() {
@@ -521,7 +495,7 @@
             const year = now.getFullYear();
             const month = String(now.getMonth() + 1).padStart(2, '0');
             const day = String(now.getDate()).padStart(2, '0');
-            const hours = String(now.getHours() % 12 || 12).padStart(2, '0'); // 12-hour format
+            const hours = String(now.getHours() % 12 || 12).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
             const seconds = String(now.getSeconds()).padStart(2, '0');
             const ampm = now.getHours() >= 12 ? 'PM' : 'AM';
@@ -534,14 +508,12 @@
                 alert("Store name is required to save the CSV file.");
                 return;
             }
-
             const barcodes = [];
             const rows = barcodeListElement.getElementsByTagName('tr');
             for (let i = 0; i < rows.length; i++) {
                 const barcode = rows[i].getElementsByTagName('td')[0].textContent;
                 barcodes.push(barcode);
             }
-
             const csvContent = "data:text/csv;charset=utf-8," + barcodes.join("\n");
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
