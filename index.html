@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barcode Scanner V2</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Barcode Scanner V2</title> <!-- Updated to V2 -->
+    <link rel="stylesheet" href="styles.css"> <!-- Updated to styles.css -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
 </head>
 <body>
-    <h1>Barcode Scanner V2</h1>
+    <h1>Barcode Scanner V2</h1> <!-- Updated to V2 -->
     <button id="initializeButton" class="main-button">Start Scanning Using Camera</button>
     <button id="addEmptyBarcodeButton" class="main-button">Add Empty Barcode To The List</button>
     <button id="saveCsvButton" class="main-button">Save Barcodes as a CSV file</button>
@@ -75,70 +75,78 @@
         const synth = window.speechSynthesis;
 
         let audioContext;
-        let beepBuffer;
-        let isAudioInitialized = false;
+        let isAudioReady = false;
 
+        // Initialize audio and ensure it's ready
         function initializeAudio() {
-            return new Promise((resolve, reject) => {
-                beepSound.load();
-                beepSound.addEventListener('loadeddata', () => {
-                    isAudioInitialized = true;
-                    resolve();
-                });
-                beepSound.addEventListener('error', (e) => {
-                    console.error('Error loading beep sound:', e);
-                    reject(e);
-                });
-                
-                if (!audioContext) {
-                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    fetch('store-scanner-beep.mp3')
-                        .then(response => response.arrayBuffer())
-                        .then(arrayBuffer => audioContext.decodeAudioData(arrayBuffer))
-                        .then(decodedData => {
-                            beepBuffer = decodedData;
-                        })
-                        .catch(e => console.error('Error with AudioContext fallback:', e));
-                }
-            });
-        }
-
-        function playBeep() {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            
+            // Preload the audio file
             return new Promise((resolve) => {
-                if (isAudioInitialized) {
-                    beepSound.currentTime = 0;
-                    const playPromise = beepSound.play();
-                    if (playPromise !== undefined) {
-                        playPromise
-                            .then(() => resolve())
-                            .catch(error => {
-                                console.warn('Primary audio playback failed:', error);
-                                if (audioContext && beepBuffer) {
-                                    const source = audioContext.createBufferSource();
-                                    source.buffer = beepBuffer;
-                                    source.connect(audioContext.destination);
-                                    source.start(0);
-                                    source.onended = () => resolve();
-                                } else {
-                                    resolve();
-                                }
-                            });
-                    }
-                } else {
-                    if (audioContext && beepBuffer) {
-                        const source = audioContext.createBufferSource();
-                        source.buffer = beepBuffer;
-                        source.connect(audioContext.destination);
-                        source.start(0);
-                        source.onended = () => resolve();
-                    } else {
-                        resolve();
-                    }
-                }
+                beepSound.addEventListener('canplaythrough', () => {
+                    isAudioReady = true;
+                    console.log('Audio file loaded and ready');
+                    resolve();
+                }, { once: true });
+                
+                beepSound.addEventListener('error', (e) => {
+                    console.error('Error loading audio file:', e);
+                    isAudioReady = false;
+                    resolve(); // Resolve even if loading fails, we'll use fallback
+                }, { once: true });
+                
+                beepSound.load();
             });
         }
 
-        window.addEventListener('load', initializeAudio);
+        // Generate a simple beep sound as fallback
+        function generateBeep() {
+            if (!audioContext) return;
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.type = 'square';
+            oscillator.frequency.setValueAtTime(1000, audioContext.currentTime); // 1000 Hz
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime); // Volume
+            
+            oscillator.start();
+            setTimeout(() => {
+                oscillator.stop();
+            }, 100); // 100ms duration
+        }
+
+        // Play beep with fallback
+        function playBeep() {
+            if (isAudioReady) {
+                beepSound.currentTime = 0;
+                const playPromise = beepSound.play();
+                if (playPromise) {
+                    playPromise.catch((error) => {
+                        console.warn('Audio playback failed:', error);
+                        generateBeep(); // Fallback to generated beep
+                    });
+                }
+            } else {
+                console.warn('Audio file not ready, using fallback');
+                generateBeep();
+            }
+        }
+
+        // Initialize audio on page load and unlock on first interaction
+        window.addEventListener('load', async () => {
+            await initializeAudio();
+        });
+
+        document.body.addEventListener('click', function unlockAudio() {
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume().then(() => {
+                    console.log('AudioContext resumed');
+                });
+            }
+            document.body.removeEventListener('click', unlockAudio);
+        }, { once: true });
 
         function speakBarcode(barcode) {
             if (synth.speaking) {
@@ -288,29 +296,16 @@
         }
 
         async function showModal(barcode) {
-            try {
-                await playBeep();
-                detectedBarcodeElement.textContent = barcode;
-                const barcodeType = getBarcodeType(barcode);
-                const barcodeDigits = barcode ? barcode.length : 0;
-                barcodeInfoElement.textContent = `${barcodeType} (${barcodeDigits} digits)`;
-                modal.style.display = 'block';
-                modalOverlay.style.display = 'block';
-                videoElement.classList.add('dimmed');
-                isModalOpen = true;
-                manualEntryElement.style.display = 'none';
-            } catch (error) {
-                console.error('Error in showModal:', error);
-                detectedBarcodeElement.textContent = barcode;
-                const barcodeType = getBarcodeType(barcode);
-                const barcodeDigits = barcode ? barcode.length : 0;
-                barcodeInfoElement.textContent = `${barcodeType} (${barcodeDigits} digits)`;
-                modal.style.display = 'block';
-                modalOverlay.style.display = 'block';
-                videoElement.classList.add('dimmed');
-                isModalOpen = true;
-                manualEntryElement.style.display = 'none';
-            }
+            playBeep(); // Play immediately, no await to avoid delaying UI
+            detectedBarcodeElement.textContent = barcode;
+            const barcodeType = getBarcodeType(barcode);
+            const barcodeDigits = barcode ? barcode.length : 0;
+            barcodeInfoElement.textContent = `${barcodeType} (${barcodeDigits} digits)`;
+            modal.style.display = 'block';
+            modalOverlay.style.display = 'block';
+            videoElement.classList.add('dimmed');
+            isModalOpen = true;
+            manualEntryElement.style.display = 'none';
         }
 
         function hideModal() {
@@ -393,7 +388,7 @@
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `${storeName}_${getCurrentDateTime()}.css`);
+            link.setAttribute("download", `${storeName}_${getCurrentDateTime()}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -402,16 +397,6 @@
         initializeButton.addEventListener('click', initializeCameraAndScanner);
         saveCsvButton.addEventListener('click', downloadCSV);
         addEmptyBarcodeButton.addEventListener('click', addEmptyBarcode);
-
-        document.body.addEventListener('click', function unlockAudio() {
-            if (!isAudioInitialized) {
-                initializeAudio();
-            }
-            if (audioContext && audioContext.state === 'suspended') {
-                audioContext.resume();
-            }
-            document.body.removeEventListener('click', unlockAudio);
-        });
     </script>
 </body>
 </html>
