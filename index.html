@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barcode Scanner V2</title> <!-- Updated to V2 -->
-    <link rel="stylesheet" href="styles.css"> <!-- Updated to styles.css -->
+    <title>Barcode Scanner V2</title>
+    <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
 </head>
 <body>
-    <h1>Barcode Scanner V2</h1> <!-- Updated to V2 -->
+    <h1>Barcode Scanner V2</h1>
     <button id="initializeButton" class="main-button">Start Scanning Using Camera</button>
     <button id="addEmptyBarcodeButton" class="main-button">Add Empty Barcode To The List</button>
     <button id="saveCsvButton" class="main-button">Save Barcodes as a CSV file</button>
@@ -32,7 +32,6 @@
         <tbody>
         </tbody>
     </table>
-    <audio id="beepSound" preload="auto" src="store-scanner-beep.mp3"></audio>
     <div class="modal-overlay" id="modalOverlay"></div>
     <div class="modal" id="modal">
         <p>Is this barcode correct?</p>
@@ -55,7 +54,6 @@
         const outputElement = document.getElementById('output');
         const barcodeListElement = document.getElementById('barcodeList').getElementsByTagName('tbody')[0];
         const latestBarcodeElement = document.getElementById('latestBarcode');
-        const beepSound = document.getElementById('beepSound');
         const initializeButton = document.getElementById('initializeButton');
         const saveCsvButton = document.getElementById('saveCsvButton');
         const addEmptyBarcodeButton = document.getElementById('addEmptyBarcodeButton');
@@ -73,35 +71,21 @@
         let isModalOpen = false;
 
         const synth = window.speechSynthesis;
-
         let audioContext;
-        let isAudioReady = false;
 
-        // Initialize audio and ensure it's ready
-        function initializeAudio() {
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            
-            // Preload the audio file
-            return new Promise((resolve) => {
-                beepSound.addEventListener('canplaythrough', () => {
-                    isAudioReady = true;
-                    console.log('Audio file loaded and ready');
-                    resolve();
-                }, { once: true });
-                
-                beepSound.addEventListener('error', (e) => {
-                    console.error('Error loading audio file:', e);
-                    isAudioReady = false;
-                    resolve(); // Resolve even if loading fails, we'll use fallback
-                }, { once: true });
-                
-                beepSound.load();
-            });
+        // Initialize AudioContext on first interaction
+        function initializeAudioContext() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                console.log('AudioContext initialized');
+            }
         }
 
-        // Generate a simple beep sound as fallback
-        function generateBeep() {
-            if (!audioContext) return;
+        // Generate a simple square wave beep
+        function playBeep() {
+            if (!audioContext) {
+                initializeAudioContext();
+            }
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
             oscillator.connect(gainNode);
@@ -117,30 +101,10 @@
             }, 100); // 100ms duration
         }
 
-        // Play beep with fallback
-        function playBeep() {
-            if (isAudioReady) {
-                beepSound.currentTime = 0;
-                const playPromise = beepSound.play();
-                if (playPromise) {
-                    playPromise.catch((error) => {
-                        console.warn('Audio playback failed:', error);
-                        generateBeep(); // Fallback to generated beep
-                    });
-                }
-            } else {
-                console.warn('Audio file not ready, using fallback');
-                generateBeep();
-            }
-        }
-
-        // Initialize audio on page load and unlock on first interaction
-        window.addEventListener('load', async () => {
-            await initializeAudio();
-        });
-
+        // Unlock AudioContext on first user interaction
         document.body.addEventListener('click', function unlockAudio() {
-            if (audioContext && audioContext.state === 'suspended') {
+            initializeAudioContext();
+            if (audioContext.state === 'suspended') {
                 audioContext.resume().then(() => {
                     console.log('AudioContext resumed');
                 });
@@ -296,7 +260,7 @@
         }
 
         async function showModal(barcode) {
-            playBeep(); // Play immediately, no await to avoid delaying UI
+            playBeep(); // Play square wave beep immediately
             detectedBarcodeElement.textContent = barcode;
             const barcodeType = getBarcodeType(barcode);
             const barcodeDigits = barcode ? barcode.length : 0;
