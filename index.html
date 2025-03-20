@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barcode Scanner V4</title>
+    <title>Barcode Scanner V2</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
 </head>
 <body>
-    <h1>Barcode Scanner V4</h1>
+    <h1>Barcode Scanner V2</h1>
     <button id="initializeButton" class="main-button">Start Scanning Using Camera</button>
     <button id="addEmptyBarcodeButton" class="main-button">Add Empty Barcode To The List</button>
     <button id="saveCsvButton" class="main-button">Save Barcodes as a CSV file</button>
@@ -71,20 +71,30 @@
         let isModalOpen = false;
 
         const synth = window.speechSynthesis;
-        let audioContext;
+        let audioContext = null;
+        let isAudioInitialized = false;
 
-        // Initialize AudioContext on first interaction
-        function initializeAudioContext() {
+        // Initialize AudioContext only after user interaction
+        function initializeAudio() {
             if (!audioContext) {
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                isAudioInitialized = true;
                 console.log('AudioContext initialized');
+            }
+            if (audioContext.state === 'suspended') {
+                audioContext.resume().then(() => {
+                    console.log('AudioContext resumed');
+                    isAudioInitialized = true;
+                });
             }
         }
 
         // Generate a simple square wave beep
         function playBeep() {
-            if (!audioContext) {
-                initializeAudioContext();
+            if (!isAudioInitialized || !audioContext) {
+                initializeAudio();
+                // If this is the first interaction, the beep will play on the next call
+                return;
             }
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
@@ -101,15 +111,10 @@
             }, 100); // 100ms duration
         }
 
-        // Unlock AudioContext on first user interaction
-        document.body.addEventListener('click', function unlockAudio() {
-            initializeAudioContext();
-            if (audioContext.state === 'suspended') {
-                audioContext.resume().then(() => {
-                    console.log('AudioContext resumed');
-                });
-            }
-            document.body.removeEventListener('click', unlockAudio);
+        // Handle first user interaction
+        document.body.addEventListener('click', function handleFirstInteraction() {
+            initializeAudio();
+            document.body.removeEventListener('click', handleFirstInteraction);
         }, { once: true });
 
         function speakBarcode(barcode) {
@@ -321,8 +326,12 @@
         }
 
         function addEmptyBarcode() {
-            playBeep(); // Added beep sound here
+            playBeep();
             updateUIWithBarcode('NO_BARCODE-00000000');
+            // If this was the first interaction and audio wasn't ready, try playing again
+            if (!isAudioInitialized) {
+                setTimeout(playBeep, 100); // Small delay to ensure AudioContext is ready
+            }
         }
 
         function getCurrentDateTime() {
