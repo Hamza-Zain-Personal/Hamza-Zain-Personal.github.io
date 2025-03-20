@@ -4,6 +4,13 @@ body {
     padding: 20px;
 }
 
+#barcodeCount {
+    font-size: 1.2em;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+
 video {
     width: 100%;
     max-width: 400px;
