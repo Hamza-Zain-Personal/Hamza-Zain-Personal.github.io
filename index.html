@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barcode Scanner V3</title>
+    <title>Barcode Scanner V23</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
 </head>
 <body>
-    <h1>Barcode Scanner V3</h1>
+    <h1>Barcode Scanner V23</h1>
+    <div id="barcodeCount">Total Barcodes: 0</div>
     <button id="initializeButton" class="main-button">Start Scanning Using Camera</button>
     <button id="addEmptyBarcodeButton" class="main-button">Add Empty Barcode To The List</button>
     <button id="saveCsvButton" class="main-button">Save Barcodes as a CSV file</button>
@@ -65,10 +66,12 @@
         const manualBarcodeInput = document.getElementById('manualBarcode');
         const initializingText = document.getElementById('initializingText');
         const dotsContainer = document.querySelector('.dots-container');
+        const barcodeCountElement = document.getElementById('barcodeCount');
         let lastDetected = '';
         let confirmCounter = 0;
         let currentBarcode = '';
         let isModalOpen = false;
+        let barcodeCount = 0;
 
         const synth = window.speechSynthesis;
         let audioContext = null;
@@ -307,6 +310,8 @@
             const typeCell = newRow.insertCell(1);
             valueCell.textContent = barcode || "";
             typeCell.textContent = barcodeType;
+            barcodeCount++;
+            barcodeCountElement.textContent = `Total Barcodes: ${barcodeCount}`;
             if (barcodeListElement.rows.length > 0) {
                 saveCsvButton.style.display = 'block';
             }
