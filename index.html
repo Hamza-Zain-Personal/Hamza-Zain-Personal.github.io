@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barcode Scanner V3</title>
+    <title>Barcode Scanner V2</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
 </head>
 <body>
-    <h1>Barcode Scanner V3</h1>
-    <div id="barcodeCount">Total Barcodes: 0</div>
+    <h1>Barcode Scanner V2</h1>
+    <div id="barcodeCount">
+        <span>Total Barcodes: </span>
+        <span id="countNumber" class="count-box">0</span>
+    </div>
     <button id="initializeButton" class="main-button">Start Scanning Using Camera</button>
     <button id="addEmptyBarcodeButton" class="main-button">Add Empty Barcode To The List</button>
     <button id="saveCsvButton" class="main-button">Save Barcodes as a CSV file</button>
@@ -67,6 +70,7 @@
         const initializingText = document.getElementById('initializingText');
         const dotsContainer = document.querySelector('.dots-container');
         const barcodeCountElement = document.getElementById('barcodeCount');
+        const countNumberElement = document.getElementById('countNumber');
         let lastDetected = '';
         let confirmCounter = 0;
         let currentBarcode = '';
@@ -311,7 +315,10 @@
             valueCell.textContent = barcode || "";
             typeCell.textContent = barcodeType;
             barcodeCount++;
-            barcodeCountElement.textContent = `Total Barcodes: ${barcodeCount}`;
+            countNumberElement.textContent = barcodeCount;
+            countNumberElement.classList.remove('count-animate');
+            void countNumberElement.offsetWidth; // Trigger reflow
+            countNumberElement.classList.add('count-animate');
             if (barcodeListElement.rows.length > 0) {
                 saveCsvButton.style.display = 'block';
             }
