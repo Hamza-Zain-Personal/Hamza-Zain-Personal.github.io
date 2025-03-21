@@ -3,15 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barcode Scanner V2</title>
+    <title>Barcode Scanner V3</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
 </head>
 <body>
-    <h1>Barcode Scanner V2</h1>
+    <h1>Barcode Scanner V3</h1>
     <div id="barcodeCount">
-        <span>Total Barcodes: </span>
-        <span id="countNumber" class="count-box">0</span>
+        Total Barcodes: <span id="countNumber" class="count-box">0</span>
     </div>
     <button id="initializeButton" class="main-button">Start Scanning Using Camera</button>
     <button id="addEmptyBarcodeButton" class="main-button">Add Empty Barcode To The List</button>
@@ -69,7 +68,6 @@
         const manualBarcodeInput = document.getElementById('manualBarcode');
         const initializingText = document.getElementById('initializingText');
         const dotsContainer = document.querySelector('.dots-container');
-        const barcodeCountElement = document.getElementById('barcodeCount');
         const countNumberElement = document.getElementById('countNumber');
         let lastDetected = '';
         let confirmCounter = 0;
@@ -316,9 +314,9 @@
             typeCell.textContent = barcodeType;
             barcodeCount++;
             countNumberElement.textContent = barcodeCount;
-            countNumberElement.classList.remove('count-animate');
-            void countNumberElement.offsetWidth; // Trigger reflow
-            countNumberElement.classList.add('count-animate');
+            countNumberElement.classList.remove('animate');
+            void countNumberElement.offsetWidth; // Trigger reflow to restart animation
+            countNumberElement.classList.add('animate');
             if (barcodeListElement.rows.length > 0) {
                 saveCsvButton.style.display = 'block';
             }
