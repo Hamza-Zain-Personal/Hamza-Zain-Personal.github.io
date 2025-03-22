@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Barcode Scanner V3</title>
+    <title>Barcode Scanner V21</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
 </head>
 <body>
-    <h1>Barcode Scanner V3</h1>
+    <h1>Barcode Scanner V21</h1>
     <div id="barcodeCount">
         Total Barcodes: <span id="countNumber" class="count-box">0</span>
     </div>
@@ -314,11 +314,11 @@
             typeCell.textContent = barcodeType;
             barcodeCount++;
             countNumberElement.textContent = barcodeCount;
-            // Remove and re-add animation class to trigger it
+            // Remove and re-add animation class with a small delay to ensure it triggers
             countNumberElement.classList.remove('pop');
             setTimeout(() => {
                 countNumberElement.classList.add('pop');
-            }, 10); // Small delay to ensure removal is processed
+            }, 10); // 10ms delay
             if (barcodeListElement.rows.length > 0) {
                 saveCsvButton.style.display = 'block';
             }
