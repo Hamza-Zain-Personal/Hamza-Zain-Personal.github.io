@@ -4,18 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TinTin Barcode Scanner</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
 </head>
 <body>
-    <h1>Scanitta</h1>
-    <h5>Barcode Scanner Web App v3.0.0</h5>
+    <h1>TinTin</h1>
+    <h5>Barcode Scanner Web App v4.0.0</h5>
     <div id="barcodeCount">
         Total Barcodes: <span id="countNumber" class="count-box">0</span>
     </div>
     <button id="initializeButton" class="main-button">Start Scanning Using Camera</button>
     <button id="addEmptyBarcodeButton" class="main-button">Add Empty Barcode To The List</button>
     <button id="saveCsvButton" class="main-button">Save Barcodes as a CSV file</button>
+    <div id="output"></div>  <!-- ADD THIS LINE -->
     <div class="camera-container">
         <video id="video" autoplay muted playsinline></video>
         <div class="dots-container">
