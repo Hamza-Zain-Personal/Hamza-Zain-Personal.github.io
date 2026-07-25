@@ -3,10 +3,14 @@ body {
     text-align: center;
     padding: 20px;
 }
-header img {
-    width: 180px;
-    margin-bottom: 10px;
+
+.logo {
+    width: 80px;
+    height: auto;
+    margin-bottom: 15px;
+    display: block;
 }
+
 video {
     width: 100%;
     max-width: 400px;
