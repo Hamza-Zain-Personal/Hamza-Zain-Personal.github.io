@@ -1,15 +1,26 @@
+/* ===================================
+   GLOBAL STYLES & RESET
+   =================================== */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+/* ===================================
+   BODY & GENERAL TEXT STYLING
+   Applies to the main page layout
+   =================================== */
 body {
     font-family: Arial, sans-serif;
     text-align: center;
     padding: 20px;
 }
 
+/* ===================================
+   LOGO IMAGE STYLING
+   Styles the Scanitta logo at the top
+   =================================== */
 img {
     width: 80px;
     height: auto;
@@ -19,6 +30,11 @@ img {
     margin-right: auto;
 }
 
+/* ===================================
+   HEADING STYLES
+   H1 = App title (Scanitta)
+   H5 = Version subtitle
+   =================================== */
 h1 {
     margin-top: 10px;
     margin-bottom: 5px;
@@ -28,6 +44,10 @@ h5 {
     margin-bottom: 20px;
 }
 
+/* ===================================
+   VIDEO ELEMENT STYLING
+   Styles the camera video feed display
+   =================================== */
 video {
     width: 100%;
     max-width: 400px;
@@ -36,6 +56,10 @@ video {
     margin-bottom: 10px;
 }
 
+/* ===================================
+   OUTPUT TEXT STYLING
+   Displays general messages to user
+   =================================== */
 #output {
     margin-top: 10px;
     font-size: 1.2em;
@@ -43,10 +67,18 @@ video {
     color: #333;
 }
 
+/* ===================================
+   ERROR MESSAGE STYLING
+   Shows error text in red color
+   =================================== */
 .error {
     color: red;
 }
 
+/* ===================================
+   LATEST BARCODE DISPLAY
+   Shows the most recently scanned barcode
+   =================================== */
 #latestBarcode {
     font-size: 1.5em;
     font-weight: bold;
@@ -54,6 +86,10 @@ video {
     color: #4CAF50;
 }
 
+/* ===================================
+   MAIN BUTTON STYLING
+   Base styles for all main buttons
+   =================================== */
 .main-button {
     display: block;
     width: 100%;
@@ -67,6 +103,12 @@ video {
     box-sizing: border-box;
 }
 
+/* ===================================
+   INDIVIDUAL BUTTON COLORS
+   Initialize Button = Red (camera start)
+   Add Empty Button = Yellow (add placeholder)
+   Save CSV Button = Green (export data)
+   =================================== */
 #initializeButton {
     background-color: #F44336;
 }
@@ -80,6 +122,11 @@ video {
     background-color: #4CAF50;
 }
 
+/* ===================================
+   CAMERA CONTAINER
+   Wrapper for video element and overlays
+   Contains video, dots, and loading text
+   =================================== */
 .camera-container {
     position: relative;
     width: 100%;
@@ -87,6 +134,11 @@ video {
     margin: 0 auto;
 }
 
+/* ===================================
+   INITIALIZING TEXT STYLING
+   Displays "Waiting To Start Scanning" message
+   Centered over the camera feed
+   =================================== */
 #initializingText {
     position: absolute;
     top: 60%;
@@ -97,6 +149,11 @@ video {
     color: #333;
 }
 
+/* ===================================
+   ANIMATED DOTS CONTAINER
+   Shows 3 blinking dots while initializing
+   Red, Yellow, Blue colors with staggered animation
+   =================================== */
 .dots-container {
     position: absolute;
     top: calc(50% - 30px);
@@ -106,6 +163,10 @@ video {
     gap: 5px;
 }
 
+/* ===================================
+   INDIVIDUAL DOT STYLING
+   Base dot properties and color-specific delays
+   =================================== */
 .dot {
     width: 10px;
     height: 10px;
@@ -128,11 +189,36 @@ video {
     animation-delay: 1s;
 }
 
+/* ===================================
+   BLINK ANIMATION FOR DOTS
+   Makes dots fade in and out continuously
+   =================================== */
 @keyframes blinkDot {
     0%, 100% { opacity: 0; }
     50% { opacity: 1; }
 }
 
+/* ===================================
+   MODAL OVERLAY
+   Semi-transparent dark background behind modal
+   Covers entire screen when modal opens
+   =================================== */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}
+
+/* ===================================
+   MODAL DIALOG BOX
+   Confirmation popup for detected barcodes
+   Shows barcode value and action buttons
+   =================================== */
 .modal {
     display: none;
     position: fixed;
@@ -147,17 +233,10 @@ video {
     width: 300px;
 }
 
-.modal-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 999;
-}
-
+/* ===================================
+   MODAL BUTTONS - BASE STYLING
+   All buttons inside the modal dialog
+   =================================== */
 .modal button {
     padding: 10px 20px;
     margin: 5px;
@@ -168,6 +247,14 @@ video {
     box-sizing: border-box;
 }
 
+/* ===================================
+   MODAL BUTTON COLORS & FUNCTIONS
+   Confirm = Green (accept barcode)
+   Rescan = Blue (scan again)
+   Read = Yellow (speak barcode)
+   Manual = Orange (enter manually)
+   Cancel = Red (close modal)
+   =================================== */
 .modal button.confirm {
     background-color: #4CAF50;
     color: white;
@@ -194,18 +281,31 @@ video {
     color: black;
 }
 
+/* ===================================
+   MODAL BUTTON GRID LAYOUT
+   Arranges buttons in 2 columns inside modal
+   =================================== */
 .modal .button-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
 }
 
+/* ===================================
+   MANUAL ENTRY SECTION STYLING
+   Hidden by default, shown when user clicks "Enter Manually"
+   Contains input field and submit button
+   =================================== */
 #manualEntry {
     display: none;
     grid-column: span 2;
     margin-top: 10px;
 }
 
+/* ===================================
+   MANUAL BARCODE INPUT FIELD
+   Text input for manually entering barcode value
+   =================================== */
 #manualEntry input {
     width: 100%;
     padding: 10px;
@@ -215,6 +315,10 @@ video {
     box-sizing: border-box;
 }
 
+/* ===================================
+   MANUAL ENTRY SUBMIT BUTTON
+   Green button to confirm manual entry
+   =================================== */
 #manualEntry button {
     width: 100%;
     padding: 10px;
@@ -225,16 +329,31 @@ video {
     cursor: pointer;
 }
 
+/* ===================================
+   DIMMED VIDEO FILTER
+   Applied to video when modal is open
+   Reduces brightness/visibility of camera feed
+   =================================== */
 .dimmed {
     filter: brightness(50%);
 }
 
+/* ===================================
+   BARCODE TYPE INFO DISPLAY
+   Shows barcode format (UPC-A, EAN-13, etc)
+   and digit count inside the modal
+   =================================== */
 #barcodeInfo {
     font-size: 0.9em;
     color: #666;
     margin-top: 5px;
 }
 
+/* ===================================
+   BARCODE LIST TABLE STYLING
+   Displays all scanned barcodes in table format
+   Shows Value and Type columns
+   =================================== */
 #barcodeList {
     width: 100%;
     max-width: 600px;
@@ -242,27 +361,49 @@ video {
     border-collapse: collapse;
 }
 
+/* ===================================
+   TABLE HEADERS & CELLS
+   Applies to all headers and data cells
+   =================================== */
 #barcodeList th, #barcodeList td {
     padding: 10px;
     border: 1px solid #ccc;
     text-align: left;
 }
 
+/* ===================================
+   TABLE HEADER STYLING
+   Gray background for column headers
+   =================================== */
 #barcodeList th {
     background-color: #f9f9f9;
     font-weight: bold;
 }
 
+/* ===================================
+   TABLE ROW ALTERNATING COLORS
+   Every other row gets light gray background
+   Improves readability
+   =================================== */
 #barcodeList tr:nth-child(even) {
     background-color: #f9f9f9;
 }
 
+/* ===================================
+   BARCODE COUNT DISPLAY
+   Shows "Total Barcodes: X" at top
+   =================================== */
 #barcodeCount {
     margin-bottom: 20px;
     font-size: 1.2em;
     color: #333;
 }
 
+/* ===================================
+   COUNT NUMBER BADGE
+   Blue box displaying the barcode count number
+   Animated with pop effect when updated
+   =================================== */
 #countNumber {
     display: inline-block;
     min-width: 40px;
@@ -277,10 +418,20 @@ video {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
+/* ===================================
+   COUNT ANIMATION CLASS
+   Triggers pop animation on the count badge
+   Applied when a new barcode is added
+   =================================== */
 #countNumber.pop {
     animation: pop 0.5s ease-out forwards;
 }
 
+/* ===================================
+   POP ANIMATION KEYFRAMES
+   Scales count number up then back to normal
+   Creates visual feedback of increment
+   =================================== */
 @keyframes pop {
     0% {
         transform: scale(1.8);
