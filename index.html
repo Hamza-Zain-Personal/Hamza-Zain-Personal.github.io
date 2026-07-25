@@ -1,61 +1,436 @@
 <!DOCTYPE html>
+<!-- 
+    ===================================
+    DOCTYPE DECLARATION
+    Tells browser this is an HTML5 document
+    =================================== 
+-->
+
 <html lang="en">
+<!-- 
+    ===================================
+    HTML ROOT ELEMENT
+    lang="en" specifies the document language is English
+    =================================== 
+-->
+
 <head>
+    <!-- 
+        ===================================
+        HEAD SECTION
+        Contains metadata, title, and links to external resources
+        Not displayed on page, but controls how page functions
+        ===================================
+    -->
+
+    <!-- 
+        ===================================
+        CHARACTER ENCODING META TAG
+        Specifies UTF-8 character encoding (supports all languages/symbols)
+        Must be within first 1024 bytes of HTML
+        =================================== 
+    -->
     <meta charset="UTF-8">
+
+    <!-- 
+        ===================================
+        VIEWPORT META TAG
+        Controls page layout on mobile devices
+        width=device-width: Makes page width match device screen width
+        initial-scale=1.0: Sets initial zoom level to 100%
+        Ensures responsive design works properly
+        =================================== 
+    -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- 
+        ===================================
+        PAGE TITLE
+        Displayed in browser tab
+        Shows "Scanitta Barcode Scanner"
+        =================================== 
+    -->
     <title>Scanitta Barcode Scanner</title>
+
+    <!-- 
+        ===================================
+        CSS STYLESHEET LINK
+        Links to external CSS file for styling
+        href="css/styles.css" loads all visual styles defined in styles.css
+        rel="stylesheet" tells browser this is a stylesheet
+        =================================== 
+    -->
     <link rel="stylesheet" href="css/styles.css">
+
+    <!-- 
+        ===================================
+        QUAGGA BARCODE LIBRARY SCRIPT
+        CDN link to Quagga JavaScript library (v0.12.1)
+        Quagga is the barcode detection engine
+        Enables barcode recognition from camera feed
+        Loaded from CDN (Content Delivery Network)
+        =================================== 
+    -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
 </head>
+
 <body>
+    <!-- 
+        ===================================
+        BODY SECTION
+        Contains all visible content on the page
+        =================================== 
+    -->
+
+    <!-- 
+        ===================================
+        LOGO IMAGE
+        Displays the Scanitta app logo at top
+        src="assets/images/logo.png" path to logo image file
+        alt="Scanitta Logo" alt text if image fails to load
+        class="logo" CSS class for styling (80px wide, centered)
+        =================================== 
+    -->
     <img src="assets/images/logo.png" alt="Scanitta Logo" class="logo">
+
+    <!-- 
+        ===================================
+        MAIN HEADING
+        Large title "Scanitta" displayed below logo
+        Styled with h1 tag (most important heading)
+        =================================== 
+    -->
     <h1>Scanitta</h1>
-    <h5>Barcode Scanner Web App v8.0.0</h5>
+
+    <!-- 
+        ===================================
+        VERSION SUBTITLE
+        Shows app version "Barcode Scanner Web App v1.0.0"
+        Styled with h5 tag (smaller heading)
+        =================================== 
+    -->
+    <h5>Barcode Scanner Web App v1.0.0</h5>
+
+    <!-- 
+        ===================================
+        BARCODE COUNT DISPLAY
+        Shows total number of barcodes scanned
+        id="barcodeCount" target for JavaScript updates
+        #countNumber span displays the actual count (starts at 0)
+        class="count-box" applies box styling (blue badge)
+        =================================== 
+    -->
     <div id="barcodeCount">
         Total Barcodes: <span id="countNumber" class="count-box">0</span>
     </div>
+
+    <!-- 
+        ===================================
+        START SCANNING BUTTON
+        Red button to initialize camera and start barcode detection
+        id="initializeButton" target for JavaScript click handler
+        class="main-button" applies button styling
+        onclick would work, but JavaScript addEventListener used instead
+        =================================== 
+    -->
     <button id="initializeButton" class="main-button">Start Scanning Using Camera</button>
+
+    <!-- 
+        ===================================
+        ADD EMPTY BARCODE BUTTON
+        Yellow button to manually add placeholder entry
+        id="addEmptyBarcodeButton" target for JavaScript click handler
+        Used when item has no barcode (e.g., produce, custom items)
+        Adds special entry: "NO_BARCODE-00000000"
+        =================================== 
+    -->
     <button id="addEmptyBarcodeButton" class="main-button">Add Empty Barcode To The List</button>
+
+    <!-- 
+        ===================================
+        SAVE CSV BUTTON
+        Green button to export all scanned barcodes to CSV file
+        id="saveCsvButton" target for JavaScript click handler
+        Initially hidden, shows only when barcodes have been scanned
+        CSV format: one barcode per line, filename includes timestamp
+        =================================== 
+    -->
     <button id="saveCsvButton" class="main-button">Save Barcodes as a CSV file</button>
+
+    <!-- 
+        ===================================
+        CAMERA CONTAINER
+        Wrapper div for camera feed and loading elements
+        class="camera-container" applies positioning (relative, centered)
+        Contains: video element, dots animation, loading text
+        position: relative allows absolute positioning of child elements
+        =================================== 
+    -->
     <div class="camera-container">
+        
+        <!-- 
+            ===================================
+            VIDEO ELEMENT
+            Displays live camera feed
+            id="video" target for JavaScript to connect camera stream
+            autoplay: starts playing immediately when stream available
+            muted: no audio from camera
+            playsinline: doesn't go fullscreen on mobile (stays inline)
+            =================================== 
+        -->
         <video id="video" autoplay muted playsinline></video>
+
+        <!-- 
+            ===================================
+            ANIMATED LOADING DOTS
+            Visual feedback while camera initializing
+            class="dots-container" positions dots absolutely over video
+            Contains 3 dots: red, yellow, blue (each has staggered animation)
+            Animation defined in CSS: blinkDot keyframes with delays
+            Dots fade in/out repeatedly to show app is loading
+            =================================== 
+        -->
         <div class="dots-container">
+            <!-- Red dot - animation starts immediately -->
             <div class="dot red"></div>
+            <!-- Yellow dot - animation starts after 0.5s delay -->
             <div class="dot yellow"></div>
+            <!-- Blue dot - animation starts after 1s delay -->
             <div class="dot blue"></div>
         </div>
+
+        <!-- 
+            ===================================
+            LOADING TEXT
+            Displays "Waiting To Start Scanning" message
+            id="initializingText" target for JavaScript visibility control
+            Shown while camera initializing, hidden when ready
+            Positioned absolutely over video element (centered)
+            =================================== 
+        -->
         <div id="initializingText">Waiting To Start Scanning</div>
     </div>
+
+    <!-- 
+        ===================================
+        LATEST BARCODE DISPLAY
+        Shows most recently scanned barcode
+        id="latestBarcode" target for JavaScript text updates
+        Initially shows "No barcode scanned yet."
+        Updated to show: "Latest Scanned: [barcode value]"
+        Green color (#4CAF50) indicates success/confirmation
+        =================================== 
+    -->
     <div id="latestBarcode">No barcode scanned yet.</div>
+
+    <!-- 
+        ===================================
+        BARCODE LIST TABLE
+        Displays all scanned barcodes in table format
+        id="barcodeList" target for JavaScript to add rows
+        Has <thead> header row and <tbody> for data rows
+        Columns: Value (barcode number), Type (UPC-A, EAN-13, etc.)
+        New barcodes inserted at top (index 0)
+        =================================== 
+    -->
     <table id="barcodeList">
+        <!-- 
+            ===================================
+            TABLE HEADER ROW
+            Defines column names
+            =================================== 
+        -->
         <thead>
             <tr>
-                <th>Value</th>
-                <th>Type</th>
+                <th>Value</th>        <!-- Column 1: Barcode value/number -->
+                <th>Type</th>         <!-- Column 2: Barcode type -->
             </tr>
         </thead>
+        
+        <!-- 
+            ===================================
+            TABLE BODY
+            Empty initially, rows added by JavaScript
+            targetElement = document.getElementById('barcodeList').getElementsByTagName('tbody')[0]
+            Each row = one scanned barcode
+            =================================== 
+        -->
         <tbody>
         </tbody>
     </table>
+
+    <!-- 
+        ===================================
+        MODAL OVERLAY
+        Semi-transparent dark background behind modal dialog
+        id="modalOverlay" target for JavaScript to show/hide
+        Covers entire screen (position: fixed, width: 100%, height: 100%)
+        Slightly transparent black (rgba(0, 0, 0, 0.5))
+        Prevents interaction with content behind modal
+        =================================== 
+    -->
     <div class="modal-overlay" id="modalOverlay"></div>
+
+    <!-- 
+        ===================================
+        MODAL DIALOG BOX
+        Confirmation dialog for detected barcodes
+        id="modal" target for JavaScript to show/hide
+        Appears when barcode detected, asks user to confirm
+        Position: fixed, centered on screen
+        Contains: barcode value, type info, and action buttons
+        =================================== 
+    -->
     <div class="modal" id="modal">
+        
+        <!-- 
+            ===================================
+            MODAL TITLE TEXT
+            Question asking user to confirm barcode
+            =================================== 
+        -->
         <p>Is this barcode correct?</p>
+
+        <!-- 
+            ===================================
+            DETECTED BARCODE VALUE
+            Displays the scanned barcode number
+            id="detectedBarcode" target for JavaScript to insert barcode value
+            Example: "123456789012"
+            =================================== 
+        -->
         <p id="detectedBarcode"></p>
+
+        <!-- 
+            ===================================
+            BARCODE INFO
+            Displays barcode type and digit count
+            id="barcodeInfo" target for JavaScript to insert info
+            Example: "UPC-A (12 digits)"
+            =================================== 
+        -->
         <div id="barcodeInfo"></div>
+
+        <!-- 
+            ===================================
+            BUTTON GRID - ACTION BUTTONS
+            Grid layout with 5 buttons in 2 columns
+            class="button-grid" CSS grid with 2 columns
+            Buttons arranged as:
+            - Row 1: Correct | Rescan
+            - Row 2: Read | Cancel
+            - Row 3: Enter Manually (spans 2 columns)
+            =================================== 
+        -->
         <div class="button-grid">
+            
+            <!-- 
+                ===================================
+                CONFIRM BUTTON
+                Green button - user says barcode is correct
+                onclick="confirmBarcode()" calls JavaScript function
+                Adds barcode to list and closes modal
+                =================================== 
+            -->
             <button class="confirm" onclick="confirmBarcode()">Correct</button>
+
+            <!-- 
+                ===================================
+                RESCAN BUTTON
+                Blue button - user says barcode was wrong
+                onclick="rescanBarcode()" calls JavaScript function
+                Closes modal to allow re-scanning
+                =================================== 
+            -->
             <button class="rescan" onclick="rescanBarcode()">Rescan</button>
+
+            <!-- 
+                ===================================
+                READ BUTTON
+                Yellow button - read barcode aloud
+                onclick="readBarcode()" calls JavaScript function
+                Uses Web Speech API to speak each digit
+                Helpful for verification and accessibility
+                =================================== 
+            -->
             <button class="read" onclick="readBarcode()">Read Barcode</button>
+
+            <!-- 
+                ===================================
+                CANCEL BUTTON
+                Red button - dismiss modal without saving
+                onclick="cancelBarcode()" calls JavaScript function
+                Closes modal, returns to camera view
+                =================================== 
+            -->
             <button class="cancel" onclick="cancelBarcode()">Cancel</button>
+
+            <!-- 
+                ===================================
+                MANUAL ENTRY BUTTON
+                Orange button - allow manual typing
+                onclick="enterManually()" calls JavaScript function
+                Shows text input field below modal
+                Useful if barcode can't be scanned
+                Spans 2 columns (full width)
+                =================================== 
+            -->
             <button class="manual" onclick="enterManually()">Enter Manually</button>
         </div>
+
+        <!-- 
+            ===================================
+            MANUAL BARCODE ENTRY SECTION
+            Hidden by default, shows when user clicks "Enter Manually"
+            id="manualEntry" target for JavaScript visibility control
+            Contains: input field and submit button
+            =================================== 
+        -->
         <div id="manualEntry">
+            
+            <!-- 
+                ===================================
+                MANUAL BARCODE INPUT FIELD
+                Text input for typing barcode
+                id="manualBarcode" target for JavaScript to get/clear value
+                type="text" allows any text input
+                placeholder="Enter barcode manually" shows hint text
+                =================================== 
+            -->
             <input type="text" id="manualBarcode" placeholder="Enter barcode manually">
+
+            <!-- 
+                ===================================
+                SUBMIT MANUAL BARCODE BUTTON
+                Green button - confirm manually typed barcode
+                onclick="submitManualBarcode()" calls JavaScript function
+                Gets value from input field, validates, and adds to list
+                =================================== 
+            -->
             <button onclick="submitManualBarcode()">Submit</button>
         </div>
     </div>
 
+    <!-- 
+        ===================================
+        MAIN APPLICATION SCRIPT
+        Loads all JavaScript logic for the app
+        src="js/app.js" contains all functions and event handlers
+        Runs AFTER all HTML elements loaded
+        Connects buttons to functions, initializes event listeners
+        =================================== 
+    -->
     <script src="js/app.js"></script>
+
+    <!-- 
+        ===================================
+        CLOUDFLARE SECURITY SCRIPT
+        Browser challenge/bot protection script
+        Injected at bottom of page for Cloudflare DDoS protection
+        Encrypted parameters protect against automated attacks
+        =================================== 
+    -->
     <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'923779fdafb30f84',t:'MTc0MjQ5NzQ3OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 </body>
+
 </html>
