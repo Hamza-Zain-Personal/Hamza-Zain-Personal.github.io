@@ -14,6 +14,7 @@ const manualBarcodeInput = document.getElementById('manualBarcode');
 const initializingText = document.getElementById('initializingText');
 const dotsContainer = document.querySelector('.dots-container');
 const countNumberElement = document.getElementById('countNumber');
+
 let lastDetected = '';
 let confirmCounter = 0;
 let currentBarcode = '';
@@ -23,35 +24,46 @@ let barcodeCount = 0;
 const synth = window.speechSynthesis;
 let audioContext = null;
 
+// Debug log
+console.log('App loaded. Output element:', outputElement);
+
 // Initialize AudioContext and play beep
 function playBeep() {
-    if (!audioContext) {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (audioContext.state === 'suspended') {
-        audioContext.resume().then(() => {
+    try {
+        if (!audioContext) {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioContext.state === 'suspended') {
+            audioContext.resume().then(() => {
+                playBeepSound();
+            });
+        } else {
             playBeepSound();
-        });
-    } else {
-        playBeepSound();
+        }
+    } catch (error) {
+        console.error('Beep error:', error);
     }
 }
 
 // Actual sound generation
 function playBeepSound() {
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    oscillator.type = 'square';
-    oscillator.frequency.setValueAtTime(1000, audioContext.currentTime); // 1000 Hz
-    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime); // Volume
-    
-    oscillator.start();
-    setTimeout(() => {
-        oscillator.stop();
-    }, 100); // 100ms duration
+    try {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.type = 'square';
+        oscillator.frequency.setValueAtTime(1000, audioContext.currentTime);
+        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+        
+        oscillator.start();
+        setTimeout(() => {
+            oscillator.stop();
+        }, 100);
+    } catch (error) {
+        console.error('Beep sound error:', error);
+    }
 }
 
 function speakBarcode(barcode) {
@@ -107,6 +119,7 @@ function validateBarcode(barcode) {
 
 async function initializeCameraAndScanner() {
     try {
+        console.log('Initializing camera and scanner...');
         initializeButton.style.display = 'none';
         initializingText.style.display = 'block';
         dotsContainer.style.display = 'flex';
@@ -152,14 +165,19 @@ async function initializeCameraAndScanner() {
         }, function (err) {
             if (err) {
                 console.error("Quagga initialization failed:", err);
-                outputElement.textContent = "Error initializing barcode scanner.";
-                outputElement.classList.add("error");
+                if (outputElement) {
+                    outputElement.textContent = "Error initializing barcode scanner.";
+                    outputElement.classList.add("error");
+                }
                 return;
             }
+            console.log('Quagga started successfully');
             Quagga.start();
             initializingText.style.display = 'none';
             dotsContainer.style.display = 'none';
-            outputElement.textContent = "Point your camera at barcodes.";
+            if (outputElement) {
+                outputElement.textContent = "Point your camera at barcodes.";
+            }
         });
 
         Quagga.onProcessed(function(result) {
@@ -169,6 +187,7 @@ async function initializeCameraAndScanner() {
         });
 
         Quagga.onDetected((data) => {
+            console.log('Barcode detected:', data.codeResult.code);
             if (isModalOpen) return;
 
             const code = data.codeResult.code;
@@ -191,8 +210,10 @@ async function initializeCameraAndScanner() {
 
     } catch (error) {
         console.error("Error accessing camera or initializing scanner:", error);
-        outputElement.textContent = "Error accessing the camera or initializing scanner.";
-        outputElement.classList.add("error");
+        if (outputElement) {
+            outputElement.textContent = "Error accessing the camera or initializing scanner.";
+            outputElement.classList.add("error");
+        }
     }
 }
 
@@ -202,7 +223,7 @@ async function processBarcode(barcode) {
 }
 
 async function showModal(barcode) {
-    playBeep(); // Play square wave beep immediately
+    playBeep();
     detectedBarcodeElement.textContent = barcode;
     const barcodeType = getBarcodeType(barcode);
     const barcodeDigits = barcode ? barcode.length : 0;
@@ -236,9 +257,9 @@ function enterManually() {
 
 function submitManualBarcode() {
     const manualBarcode = manualBarcodeInput.value;
-    if (manualBarcode) { // Only proceed if there's a value
+    if (manualBarcode) {
         updateUIWithBarcode(manualBarcode);
-        playBeep(); // Play beep when submitting manually
+        playBeep();
         manualBarcodeInput.value = '';
         hideModal();
     }
@@ -262,11 +283,10 @@ function updateUIWithBarcode(barcode) {
     typeCell.textContent = barcodeType;
     barcodeCount++;
     countNumberElement.textContent = barcodeCount;
-    // Remove and re-add animation class with a small delay to ensure it triggers
     countNumberElement.classList.remove('pop');
     setTimeout(() => {
         countNumberElement.classList.add('pop');
-    }, 10); // 10ms delay
+    }, 10);
     if (barcodeListElement.rows.length > 0) {
         saveCsvButton.style.display = 'block';
     }
@@ -274,7 +294,7 @@ function updateUIWithBarcode(barcode) {
 
 function addEmptyBarcode() {
     updateUIWithBarcode('NO_BARCODE-00000000');
-    playBeep(); // Play beep after UI update
+    playBeep();
 }
 
 function getCurrentDateTime() {
